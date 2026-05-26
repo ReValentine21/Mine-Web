@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
     <title>MINE-WEB Mobile</title>
     <style>
-        /* Базовые настройки */
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
             background-color: #111; 
-            /* Современный системный шрифт */
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             touch-action: none; user-select: none; -webkit-user-select: none;
         }
@@ -19,7 +17,7 @@
             z-index: 1; display: none;
         }
 
-        /* === ПРЕДУПРЕЖДЕНИЕ ОБ ОРИЕНТАЦИИ === */
+        /* Предупреждение об ориентации */
         #orientation-warning {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
             background: linear-gradient(135deg, #1f1f1f, #000000); color: #fff;
@@ -33,7 +31,7 @@
         .rotate-icon { font-size: 48px; animation: rotate 2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
         @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* === СОВРЕМЕННОЕ ГЛАВНОЕ МЕНЮ === */
+        /* Главное меню */
         #main-menu {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
             background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
@@ -50,7 +48,6 @@
             font-weight: 600; letter-spacing: 5px; margin-top: 5px; text-transform: uppercase;
         }
 
-        /* Красивая кнопка старта */
         .start-btn {
             padding: 16px 40px; border: none; border-radius: 30px;
             background: linear-gradient(135deg, #2ecc71, #27ae60);
@@ -59,16 +56,12 @@
             box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
             transition: transform 0.1s, box-shadow 0.1s;
         }
-        .start-btn:active { 
-            transform: scale(0.95); 
-            box-shadow: 0 5px 10px rgba(46, 204, 113, 0.2); 
-        }
+        .start-btn:active { transform: scale(0.95); box-shadow: 0 5px 10px rgba(46, 204, 113, 0.2); }
 
-        /* === ИГРОВОЙ HUD (СОВРЕМЕННЫЙ СТИЛЬ СТЕКЛА) === */
+        /* Игровой HUD */
         #crosshair {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 12px; height: 12px; z-index: 10; pointer-events: none; display: none;
-            opacity: 0.8;
+            width: 12px; height: 12px; z-index: 10; pointer-events: none; display: none; opacity: 0.8;
         }
         #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; border-radius: 2px;}
         #crosshair::before { top: 5px; left: 0; width: 12px; height: 2px; }
@@ -82,7 +75,6 @@
             display: none;
         }
 
-        /* Панели управления */
         #d-pad {
             position: absolute; bottom: 20px; left: 20px; z-index: 10;
             display: none; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px 55px; gap: 8px;
@@ -92,14 +84,10 @@
             display: none; grid-template-columns: 60px 60px; gap: 12px;
         }
 
-        /* Стиль стеклянных кнопок */
         .btn {
-            background: rgba(255, 255, 255, 0.15); 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2); 
-            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 14px;
             color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .btn:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.95); }
         
@@ -109,9 +97,8 @@
         #btn-d { grid-column: 3; grid-row: 2; }
         
         .action-btn { width: 60px; height: 60px; border-radius: 50%; font-size: 22px; }
-        #btn-jump { grid-column: 1 / span 2; height: 45px; font-size: 13px; font-weight: bold; border-radius: 12px; letter-spacing: 1px; }
+        #btn-jump { grid-column: 1 / span 2; height: 45px; font-size: 13px; font-weight: bold; border-radius: 12px; }
 
-        /* Инвентарь */
         #hotbar {
             position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
             z-index: 10; display: none; background: rgba(0,0,0,0.5);
@@ -121,8 +108,7 @@
         .slot {
             width: 42px; height: 42px; background: rgba(255,255,255,0.1); 
             border: 2px solid transparent; border-radius: 10px;
-            display: flex; justify-content: center; align-items: center; font-size: 22px;
-            transition: all 0.2s ease;
+            display: flex; justify-content: center; align-items: center; font-size: 22px; transition: all 0.2s ease;
         }
         .slot.active { border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); transform: translateY(-2px); }
     </style>
@@ -138,7 +124,7 @@
     </div>
 
     <div id="main-menu">
-        <div class="menu-title">MINE-WEB<br><span>Mobile Edition</span></div>
+        <div class="menu-title">MINE-WEB<br><span>МОБИЛЬНАЯ ВЕРСИЯ</span></div>
         <button class="start-btn" id="play-btn">Начать игру</button>
     </div>
 
@@ -169,14 +155,13 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // === ЛОГИКА ОРИЕНТАЦИИ ===
-        const warningScreen = document.getElementById('orientation-warning');
+        // === ЛОГИКА ОРИЕНТАЦИИ И ЭКРАНА ===
         function checkOrientation() {
             const isLandscape = window.innerWidth > window.innerHeight;
             if (!isLandscape) {
-                warningScreen.classList.add('active');
+                document.getElementById('orientation-warning').classList.add('active');
             } else {
-                warningScreen.classList.remove('active');
+                document.getElementById('orientation-warning').classList.remove('active');
                 window.dispatchEvent(new Event('resize'));
             }
         }
@@ -184,42 +169,37 @@
         window.addEventListener('resize', checkOrientation);
         window.addEventListener('orientationchange', checkOrientation);
 
-        // === ПОЛНОЭКРАННЫЙ РЕЖИМ (ФУЛСКРИН) ===
         function requestFullScreen() {
             const docElm = document.documentElement;
             if (docElm.requestFullscreen) docElm.requestFullscreen();
-            else if (docElm.mozRequestFullScreen) docElm.mozRequestFullScreen();
             else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen();
-            else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
         }
-
         function exitFullScreen() {
             if (document.exitFullscreen) document.exitFullscreen();
-            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
             else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-            else if (document.msExitFullscreen) document.msExitFullscreen();
         }
 
-        // === НАСТРОЙКИ СЦЕНЫ И ОПТИМИЗАЦИИ ===
+        // === СЦЕНА, ОПТИМИЗАЦИЯ И ТУМАН ===
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.FogExp2(0x87CEEB, 0.04);
+        // Туман (цвет, начало, конец). Скрывает подгрузку чанков!
+        scene.fog = new THREE.Fog(0x87CEEB, 8, 14); 
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.rotation.order = 'YXZ';
 
         const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Легкая оптимизация пикселей
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         document.getElementById('game-canvas').appendChild(renderer.domElement);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambientLight);
-        const sunLight = new THREE.DirectionalLight(0xffffff, 0.5); sunLight.position.set(20, 50, 20); scene.add(sunLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.4); sunLight.position.set(20, 50, 20); scene.add(sunLight);
 
-        // === МАТЕРИАЛЫ И БЛОКИ ===
+        // === МАТЕРИАЛЫ И БЛОКИ (SPATIAL HASH ДЛЯ ОПТИМИЗАЦИИ) ===
         const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
         const edgeGeo = new THREE.EdgesGeometry(blockGeometry);
-        const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1, opacity: 0.5, transparent: true });
+        const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.3, transparent: true });
 
         const materialsMap = {
             0: [new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x5b9c31}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043})],
@@ -229,25 +209,52 @@
         };
 
         let currentSelectedBlockType = 0;
-        const worldBlocks = [];
-        const mapSize = 12;
-
-        for (let x = -mapSize; x <= mapSize; x++) {
-            for (let z = -mapSize; z <= mapSize; z++) {
-                createBlock(x, 0, z, 0);
-            }
-        }
+        const worldBlocks = []; 
+        const blockMap = new Map(); // Сверхбыстрый поиск блоков (Оптимизация)
 
         function createBlock(x, y, z, type) {
+            const key = `${x},${y},${z}`;
+            if (blockMap.has(key)) return; // Защита от дубликатов
+
             const mats = materialsMap[type];
             const block = new THREE.Mesh(blockGeometry, mats);
             block.position.set(x, y, z);
+            
             const lines = new THREE.LineSegments(edgeGeo, edgeMat);
             block.add(lines);
+            
             scene.add(block);
             worldBlocks.push(block);
+            blockMap.set(key, block);
         }
 
+        // === ГЕНЕРАЦИЯ ЧАНКОВ (БЕСКОНЕЧНЫЙ МИР) ===
+        const generatedColumns = new Set();
+        const renderDistance = 12; // Радиус прорисовки (маленький радиус + туман = топ ФПС)
+
+        function generateChunks() {
+            const pX = Math.round(camera.position.x);
+            const pZ = Math.round(camera.position.z);
+            let blocksAddedThisFrame = 0;
+
+            for(let x = pX - renderDistance; x <= pX + renderDistance; x++) {
+                for(let z = pZ - renderDistance; z <= pZ + renderDistance; z++) {
+                    // Генерируем кругом, а не квадратом
+                    if (Math.hypot(x - pX, z - pZ) <= renderDistance) {
+                        const colKey = `${x},${z}`;
+                        if(!generatedColumns.has(colKey)) {
+                            generatedColumns.add(colKey);
+                            createBlock(x, 0, z, 0); // Ставим блок травы
+                            blocksAddedThisFrame++;
+                            // Ограничиваем создание блоков за один кадр, чтобы не было лагов
+                            if(blocksAddedThisFrame > 15) return; 
+                        }
+                    }
+                }
+            }
+        }
+
+        // Выбор блоков
         const slots = document.querySelectorAll('.slot');
         slots.forEach(slot => {
             slot.addEventListener('touchstart', (e) => {
@@ -258,22 +265,19 @@
             });
         });
 
-        // === КАМЕРА ===
+        // === КАМЕРА (ПЛАВНЫЙ ПОВОРОТ) ===
         let isDragging = false;
         let prevTouchX = 0, prevTouchY = 0;
         const canvasZone = document.getElementById('game-canvas');
 
         canvasZone.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            prevTouchX = e.touches[0].clientX;
-            prevTouchY = e.touches[0].clientY;
+            isDragging = true; prevTouchX = e.touches[0].clientX; prevTouchY = e.touches[0].clientY;
         });
 
         canvasZone.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
             const deltaX = e.touches[0].clientX - prevTouchX;
             const deltaY = e.touches[0].clientY - prevTouchY;
-
             if (Math.abs(deltaX) < 100 && Math.abs(deltaY) < 100) {
                 camera.rotation.y -= deltaX * 0.005;
                 camera.rotation.x -= deltaY * 0.005;
@@ -283,22 +287,24 @@
         });
         canvasZone.addEventListener('touchend', () => isDragging = false);
 
-        // === ФИЗИКА ===
+        // === ФИЗИКА, ХОДЬБА И КОЛЛИЗИИ ===
         const moveState = { forward: false, backward: false, left: false, right: false };
         let playerVelocityY = 0;
         let isGrounded = true;
         const gravity = -0.015;
-        const jumpForce = 0.25;
+        const jumpForce = 0.22;
         const speed = 0.09;
         
-        const playerRadius = 0.35;
-        const playerHeight = 2.0; 
-        camera.position.set(0, playerHeight, 0); 
+        const playerRadius = 0.3;
+        const playerHeight = 1.8; // Рост почти 2 блока
+        camera.position.set(0, playerHeight + 0.5, 0); // Начальная высота
 
+        // Функция привязки кнопок (с защитой от залипания)
         function bindControl(id, action) {
             const el = document.getElementById(id);
             el.addEventListener('touchstart', (e) => { e.preventDefault(); moveState[action] = true; });
             el.addEventListener('touchend', (e) => { e.preventDefault(); moveState[action] = false; });
+            el.addEventListener('touchcancel', (e) => { e.preventDefault(); moveState[action] = false; });
         }
         bindControl('btn-w', 'forward'); bindControl('btn-s', 'backward');
         bindControl('btn-a', 'left'); bindControl('btn-d', 'right');
@@ -308,32 +314,38 @@
             if (isGrounded) { playerVelocityY = jumpForce; isGrounded = false; }
         });
 
+        // ИСПРАВЛЕННАЯ СИСТЕМА КОЛЛИЗИЙ
         function checkCollisions(targetPos) {
-            for (let i = 0; i < worldBlocks.length; i++) {
-                const b = worldBlocks[i].position;
-                if (Math.abs(b.x - targetPos.x) < 1.1 && Math.abs(b.z - targetPos.z) < 1.1 && Math.abs(b.y - (targetPos.y - 1.0)) < 1.5) {
-                    const boxMinX = b.x - 0.5, boxMaxX = b.x + 0.5;
-                    const boxMinZ = b.z - 0.5, boxMaxZ = b.z + 0.5;
-                    const boxMinY = b.y - 0.5, boxMaxY = b.y + 0.5;
+            const pMinX = targetPos.x - playerRadius, pMaxX = targetPos.x + playerRadius;
+            const pMinZ = targetPos.z - playerRadius, pMaxZ = targetPos.z + playerRadius;
+            // Важное исправление: +0.05 не дает персонажу спотыкаться о блок под ногами
+            const pMinY = targetPos.y - playerHeight + 0.05, pMaxY = targetPos.y; 
 
-                    const closestX = Math.max(boxMinX, Math.min(targetPos.x, boxMaxX));
-                    const closestZ = Math.max(boxMinZ, Math.min(targetPos.z, boxMaxZ));
+            // Проверяем блоки в сетке вокруг игрока
+            const minGridX = Math.floor(pMinX), maxGridX = Math.floor(pMaxX);
+            const minGridZ = Math.floor(pMinZ), maxGridZ = Math.floor(pMaxZ);
+            const minGridY = Math.floor(pMinY), maxGridY = Math.floor(pMaxY);
 
-                    const distX = targetPos.x - closestX;
-                    const distZ = targetPos.z - closestZ;
-                    
-                    const pMinY = targetPos.y - playerHeight;
-                    const pMaxY = targetPos.y;
-
-                    if ((distX * distX + distZ * distZ) < (playerRadius * playerRadius) && (pMinY < boxMaxY && pMaxY > boxMinY)) {
-                        return true; 
+            for(let x = minGridX; x <= maxGridX; x++) {
+                for(let y = minGridY; y <= maxGridY; y++) {
+                    for(let z = minGridZ; z <= maxGridZ; z++) {
+                        if(blockMap.has(`${x},${y},${z}`)) {
+                            const bMinX = x - 0.5, bMaxX = x + 0.5;
+                            const bMinY = y - 0.5, bMaxY = y + 0.5;
+                            const bMinZ = z - 0.5, bMaxZ = z + 0.5;
+                            
+                            // Пересечение кубов
+                            if (pMinX < bMaxX && pMaxX > bMinX && pMinZ < bMaxZ && pMaxZ > bMinZ && pMinY < bMaxY && pMaxY > bMinY) {
+                                return true; // Столкновение!
+                            }
+                        }
                     }
                 }
             }
             return false;
         }
 
-        // === СТРОИТЕЛЬСТВО ===
+        // === СТРОИТЕЛЬСТВО И РАЗРУШЕНИЕ ===
         const raycaster = new THREE.Raycaster();
         const center = new THREE.Vector2(0, 0);
 
@@ -343,9 +355,10 @@
             const intersects = raycaster.intersectObjects(worldBlocks);
             if (intersects.length > 0 && intersects[0].distance < 6) {
                 const b = intersects[0].object;
-                if(b.position.y === 0) return;
+                if(b.position.y === 0) return; // Запрещаем ломать самый нижний пол
                 scene.remove(b);
                 worldBlocks.splice(worldBlocks.indexOf(b), 1);
+                blockMap.delete(`${b.position.x},${b.position.y},${b.position.z}`);
             }
         });
 
@@ -354,42 +367,39 @@
             raycaster.setFromCamera(center, camera);
             const intersects = raycaster.intersectObjects(worldBlocks);
             if (intersects.length > 0 && intersects[0].distance < 6) {
-                const intersect = intersects[0];
-                const spawnPos = new THREE.Vector3().copy(intersect.object.position).add(intersect.face.normal);
+                const spawnPos = new THREE.Vector3().copy(intersects[0].object.position).add(intersects[0].face.normal);
                 
-                const distToPlayer = spawnPos.distanceTo(new THREE.Vector3(camera.position.x, spawnPos.y, camera.position.z));
-                if (distToPlayer > 0.7 || Math.abs(camera.position.y - spawnPos.y) > playerHeight - 0.2) {
+                // Проверка, чтобы не поставить блок внутри себя
+                const pMinX = camera.position.x - playerRadius, pMaxX = camera.position.x + playerRadius;
+                const pMinZ = camera.position.z - playerRadius, pMaxZ = camera.position.z + playerRadius;
+                const pMinY = camera.position.y - playerHeight, pMaxY = camera.position.y;
+                const bMinX = spawnPos.x - 0.5, bMaxX = spawnPos.x + 0.5;
+                const bMinY = spawnPos.y - 0.5, bMaxY = spawnPos.y + 0.5;
+                const bMinZ = spawnPos.z - 0.5, bMaxZ = spawnPos.z + 0.5;
+
+                const isInsidePlayer = (pMinX < bMaxX && pMaxX > bMinX && pMinZ < bMaxZ && pMaxZ > bMinZ && pMinY < bMaxY && pMaxY > bMinY);
+                
+                if (!isInsidePlayer) {
                     createBlock(spawnPos.x, spawnPos.y, spawnPos.z, currentSelectedBlockType);
                 }
             }
         });
 
-        // === МЕНЕДЖЕР ЭКРАНОВ С ФУЛСКРИНОМ ===
+        // === МЕНЕДЖЕР ЭКРАНОВ ===
         function toggleUI(inGame) {
             const state = inGame ? 'block' : 'none';
-            const menuState = inGame ? 'none' : 'flex';
-            document.getElementById('main-menu').style.display = menuState;
+            document.getElementById('main-menu').style.display = inGame ? 'none' : 'flex';
             document.getElementById('game-canvas').style.display = state;
             document.getElementById('crosshair').style.display = state;
             document.getElementById('exit-btn').style.display = state;
             document.getElementById('d-pad').style.display = inGame ? 'grid' : 'none';
             document.getElementById('action-pad').style.display = inGame ? 'grid' : 'none';
             document.getElementById('hotbar').style.display = inGame ? 'flex' : 'none';
-            
-            if(inGame) {
-                setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
-            }
+            if(inGame) setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
         }
 
-        document.getElementById('play-btn').addEventListener('click', () => {
-            requestFullScreen(); // Запрос полного экрана при старте
-            toggleUI(true);
-        });
-        
-        document.getElementById('exit-btn').addEventListener('click', () => {
-            exitFullScreen(); // Выход из полного экрана
-            toggleUI(false);
-        });
+        document.getElementById('play-btn').addEventListener('click', () => { requestFullScreen(); toggleUI(true); });
+        document.getElementById('exit-btn').addEventListener('click', () => { exitFullScreen(); toggleUI(false); });
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -397,32 +407,50 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // === ЦИКЛ ===
+        // === ИГРОВОЙ ЦИКЛ ===
         const moveDir = new THREE.Vector3();
 
         function animate() {
             requestAnimationFrame(animate);
 
+            // 1. Постоянная генерация мира вокруг игрока
+            generateChunks();
+
+            // 2. Гравитация и высота пола
             playerVelocityY += gravity;
             camera.position.y += playerVelocityY;
 
-            let groundY = playerHeight; 
-            
-            for(let i=0; i<worldBlocks.length; i++) {
-                let b = worldBlocks[i].position;
-                if (Math.abs(b.x - camera.position.x) < 0.65 && Math.abs(b.z - camera.position.z) < 0.65) {
-                    if (b.y + playerHeight > groundY && camera.position.y >= b.y + playerHeight - 0.2) {
-                        groundY = b.y + playerHeight;
+            let highestFloorY = -Infinity;
+            const cMinX = Math.round(camera.position.x - playerRadius);
+            const cMaxX = Math.round(camera.position.x + playerRadius);
+            const cMinZ = Math.round(camera.position.z - playerRadius);
+            const cMaxZ = Math.round(camera.position.z + playerRadius);
+
+            // Ищем блок строго под ногами для приземления
+            for(let x = cMinX; x <= cMaxX; x++) {
+                for(let z = cMinZ; z <= cMaxZ; z++) {
+                    for(let y = Math.floor(camera.position.y); y >= 0; y--) {
+                        if(blockMap.has(`${x},${y},${z}`)) {
+                            const blockTop = y + 0.5;
+                            if(blockTop <= camera.position.y - playerHeight + 0.3) {
+                                if(blockTop > highestFloorY) highestFloorY = blockTop;
+                            }
+                            break;
+                        }
                     }
                 }
             }
 
-            if (camera.position.y <= groundY) {
-                camera.position.y = groundY;
+            let groundY = highestFloorY !== -Infinity ? highestFloorY : 0.5; // Базовый пол 0.5
+            const targetCameraY = groundY + playerHeight;
+
+            if (camera.position.y <= targetCameraY) {
+                camera.position.y = targetCameraY;
                 playerVelocityY = 0;
                 isGrounded = true;
             }
 
+            // 3. Ходьба
             moveDir.set(0, 0, 0);
             if (moveState.forward) moveDir.z -= 1;
             if (moveState.backward) moveDir.z += 1;
@@ -434,14 +462,10 @@
                 moveDir.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
                 
                 let testPosX = camera.position.clone().addScaledVector(new THREE.Vector3(moveDir.x, 0, 0), speed);
-                if (!checkCollisions(testPosX)) {
-                    camera.position.x = testPosX.x;
-                }
+                if (!checkCollisions(testPosX)) camera.position.x = testPosX.x;
                 
                 let testPosZ = camera.position.clone().addScaledVector(new THREE.Vector3(0, 0, moveDir.z), speed);
-                if (!checkCollisions(testPosZ)) {
-                    camera.position.z = testPosZ.z;
-                }
+                if (!checkCollisions(testPosZ)) camera.position.z = testPosZ.z;
             }
 
             renderer.render(scene, camera);
