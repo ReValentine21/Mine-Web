@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>Minecraft Mobile 2 Blocks Edition</title>
+    <style>
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: #222; font-family: 'Arial Black', sans-serif;
+            touch-action: none; user-select: none; -webkit-user-select: none;
+        }
+
+        #game-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; display: none;
+        }
+
+        /* === ПРЕДУПРЕЖДЕНИЕ ОБ ОРИЕНТАЦИИ (ПОРТРЕТНЫЙ РЕЖИМ) === */
+        #orientation-warning {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
+            background-color: #333; color: #fff;
+            display: none; /* Скрыт по умолчанию, JS его покажет */
+            justify-content: center; align-items: center; text-align: center;
+            flex-direction: column; font-family: 'Arial Black', sans-serif;
+        }
+        #orientation-warning.active { display: flex; }
+        .warning-content { padding: 20px; }
+        #orientation-warning h1 { font-size: 36px; color: #f44336; margin-bottom: 15px; text-shadow: 2px 2px 0 #000; }
+        #orientation-warning p { font-size: 16px; line-height: 1.4; margin-bottom: 25px; }
+        .rotate-icon { font-size: 56px; animation: rotate 2.5s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* === ОФИЦИАЛЬНОЕ СТРОГОЕ ГЛАВНОЕ МЕНЮ === */
+        #main-menu {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
+            background: #3a3a3a;
+            background-image: radial-gradient(rgba(0,0,0,0.3) 15%, transparent 16%),
+                              radial-gradient(rgba(0,0,0,0.3) 15%, transparent 16%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .menu-title {
+            font-size: 32px; color: #fff; text-shadow: 3px 3px 0px #111;
+            margin-bottom: 35px; letter-spacing: 2.5px; text-align: center;
+        }
+        .menu-title span { color: #55ff55; }
+
+        .menu-btn {
+            width: 260px; padding: 12px; background: #6c6c6c;
+            border: 3px solid #000; border-top-color: #b1b1b1; border-left-color: #b1b1b1;
+            color: #fff; font-size: 14px; text-shadow: 1px 1px 0px #000;
+            cursor: pointer; text-align: center; box-shadow: 0 4px 0px #222;
+        }
+        .menu-btn:active { background: #4e4e4e; transform: translateY(2px); box-shadow: 0 2px 0px #222; }
+
+        /* === ИГРОВОЙ HUD (ИНТЕРФЕЙС) === */
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 16px; height: 16px; z-index: 10; pointer-events: none; display: none;
+        }
+        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; }
+        #crosshair::before { top: 7px; left: 0; width: 16px; height: 2px; }
+        #crosshair::after { top: 0; left: 7px; width: 2px; height: 16px; }
+
+        #exit-btn {
+            position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+            z-index: 15; padding: 5px 14px; font-size: 11px; display: none; width: auto;
+        }
+
+        #d-pad {
+            position: absolute; bottom: 15px; left: 15px; z-index: 10;
+            display: none; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px 50px; gap: 4px;
+        }
+
+        #action-pad {
+            position: absolute; bottom: 15px; right: 15px; z-index: 10;
+            display: none; grid-template-columns: 55px 55px; gap: 8px;
+        }
+
+        .btn {
+            background: rgba(50, 50, 50, 0.5); border: 2px solid #fff; border-radius: 6px;
+            color: #fff; display: flex; justify-content: center; align-items: center; font-size: 16px;
+        }
+        .btn:active { background: rgba(255, 255, 255, 0.4); }
+        
+        #btn-w { grid-column: 2; grid-row: 1; }
+        #btn-a { grid-column: 1; grid-row: 2; }
+        #btn-s { grid-column: 2; grid-row: 3; }
+        #btn-d { grid-column: 3; grid-row: 2; }
+        
+        .action-btn { width: 50px; height: 50px; border-radius: 50%; font-size: 18px; }
+        #btn-jump { grid-column: 1 / span 2; height: 38px; font-size: 11px; border-radius: 4px; }
+
+        #hotbar {
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            z-index: 10; display: none; background: rgba(0,0,0,0.6);
+            border: 3px solid #444; padding: 2px; gap: 4px; border-radius: 4px;
+        }
+        .slot {
+            width: 36px; height: 36px; background: #8b8b8b; border: 2px solid #3a3a3a;
+            display: flex; justify-content: center; align-items: center; font-size: 18px;
+            cursor: pointer;
+        }
+        .slot.active { border-color: #fff; background: #b1b1b1; }
+    </style>
+</head>
+<body>
+
+    <div id="orientation-warning">
+        <div class="warning-content">
+            <h1>УПС! ПОВЕРНИТЕ ЭКРАН</h1>
+            <p>Для игры требуется горизонтальный (ландшафтный) режим.<br>Пожалуйста, переверните ваше устройство.</p>
+            <div class="rotate-icon">🔄</div>
+        </div>
+    </div>
+
+    <div id="main-menu">
+        <div class="menu-title">MINECRAFT PE<br><span>WEB 2 BLOCKS EDITION</span></div>
+        <div class="menu-btn" id="play-btn">НАЧАТЬ ИГРУ</div>
+    </div>
+
+    <div id="crosshair"></div>
+    <div id="exit-btn" class="menu-btn">В МЕНЮ</div>
+    
+    <div id="game-canvas"></div>
+
+    <div id="d-pad">
+        <div id="btn-w" class="btn">▲</div>
+        <div id="btn-a" class="btn">◀</div>
+        <div id="btn-s" class="btn">▼</div>
+        <div id="btn-d" class="btn">▶</div>
+    </div>
+
+    <div id="action-pad">
+        <div id="btn-build" class="btn action-btn">🧱</div>
+        <div id="btn-break" class="btn action-btn">🔨</div>
+        <div id="btn-jump" class="btn">ПРЫЖОК</div>
+    </div>
+
+    <div id="hotbar">
+        <div class="slot active" data-block="0">🟩</div>
+        <div class="slot" data-block="1">🟫</div>
+        <div class="slot" data-block="2">⬜</div>
+        <div class="slot" data-block="3">🟧</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // === ЛОГИКА ОБНАРУЖЕНИЯ ОРИЕНТАЦИИ (НОВИНКА) ===
+        const warningScreen = document.getElementById('orientation-warning');
+        
+        function checkOrientation() {
+            // Проверяем: ширина больше высоты = ландшафт
+            const isLandscape = window.innerWidth > window.innerHeight;
+            
+            if (!isLandscape) {
+                // Если портретный режим (вертикально): показать предупреждение, скрыть игру
+                warningScreen.classList.add('active');
+            } else {
+                // Если ландшафтный режим (горизонтально): скрыть предупреждение, разблокировать игру
+                warningScreen.classList.remove('active');
+                // Триггер изменения размеров для three.js
+                window.dispatchEvent(new Event('resize'));
+            }
+        }
+
+        // Следим за изменениями размера окна и загрузкой
+        window.addEventListener('DOMContentLoaded', checkOrientation);
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+
+        // === НАСТРОЙКИ СЦЕНЫ И ОПТИМИЗАЦИИ ===
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x7ec0ee);
+        scene.fog = new THREE.FogExp2(0x7ec0ee, 0.04);
+
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.rotation.order = 'YXZ';
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('game-canvas').appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.4); sunLight.position.set(20, 40, 10); scene.add(sunLight);
+
+        // === МАТЕРИАЛЫ И БЛОКИ ===
+        const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const edgeGeo = new THREE.EdgesGeometry(blockGeometry);
+        const edgeMat = new THREE.LineBasicMaterial({ color: 0x111111 });
+
+        const materialsMap = {
+            0: [new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x5b9c31}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043})], // Трава
+            1: Array(6).fill(new THREE.MeshLambertMaterial({color:0x866043})), // Земля
+            2: Array(6).fill(new THREE.MeshLambertMaterial({color:0x777777})), // Камень
+            3: Array(6).fill(new THREE.MeshLambertMaterial({color:0xb07f35}))  // Доски
+        };
+
+        let currentSelectedBlockType = 0;
+        const worldBlocks = [];
+        const mapSize = 10;
+
+        for (let x = -mapSize; x <= mapSize; x++) {
+            for (let z = -mapSize; z <= mapSize; z++) {
+                createBlock(x, 0, z, 0);
+            }
+        }
+
+        function createBlock(x, y, z, type) {
+            const mats = materialsMap[type];
+            const block = new THREE.Mesh(blockGeometry, mats);
+            block.position.set(x, y, z);
+            const lines = new THREE.LineSegments(edgeGeo, edgeMat);
+            block.add(lines);
+            scene.add(block);
+            worldBlocks.push(block);
+        }
+
+        const slots = document.querySelectorAll('.slot');
+        slots.forEach(slot => {
+            slot.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Защита от срабатывания нескольких касаний
+                slots.forEach(s => s.classList.remove('active'));
+                slot.classList.add('active');
+                currentSelectedBlockType = parseInt(slot.getAttribute('data-block'));
+            });
+        });
+
+        // === ПЛАВНОЕ МОБИЛЬНОЕ ВРАЩЕНИЕ КАМЕРЫ ===
+        let isDragging = false;
+        let prevTouchX = 0, prevTouchY = 0;
+        const canvasZone = document.getElementById('game-canvas');
+
+        canvasZone.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            prevTouchX = e.touches[0].clientX;
+            prevTouchY = e.touches[0].clientY;
+        });
+
+        canvasZone.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
+
+            const deltaX = touchX - prevTouchX;
+            const deltaY = touchY - prevTouchY;
+
+            if (Math.abs(deltaX) < 80 && Math.abs(deltaY) < 80) {
+                camera.rotation.y -= deltaX * 0.005;
+                camera.rotation.x -= deltaY * 0.005;
+                camera.rotation.x = Math.max(-Math.PI/2.3, Math.min(Math.PI/2.3, camera.rotation.x));
+            }
+            prevTouchX = touchX; prevTouchY = touchY;
+        });
+        canvasZone.addEventListener('touchend', () => isDragging = false);
+
+        // === ДВИЖЕНИЕ И ФИЗИКА (УВЕЛИЧЕНА ВЫСОТА) ===
+        const moveState = { forward: false, backward: false, left: false, right: false };
+        let playerVelocityY = 0;
+        let isGrounded = true;
+        const gravity = -0.012;
+        const jumpForce = 0.22;
+        const speed = 0.07;
+        
+        const playerRadius = 0.35;
+        // --- ИЗМЕНЕНИЕ: РОСТ ТЕПЕРЬ 2 БЛОКА ---
+        const playerHeight = 2.0; // Высота до глаз. Был 1.8.
+
+        // --- ИЗМЕНЕНИЕ: ГЛАЗА СРАЗУ НА ВЫСОТЕ 2.0 ---
+        camera.position.set(0, playerHeight, 0); 
+
+        function bindControl(id, action) {
+            const el = document.getElementById(id);
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); moveState[action] = true; });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); moveState[action] = false; });
+        }
+        bindControl('btn-w', 'forward'); bindControl('btn-s', 'backward');
+        bindControl('btn-a', 'left'); bindControl('btn-d', 'right');
+
+        document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (isGrounded) { playerVelocityY = jumpForce; isGrounded = false; }
+        });
+
+        // Функция проверки коллизий цилиндра игрока и боксов
+        function checkCollisions(targetPos) {
+            for (let i = 0; i < worldBlocks.length; i++) {
+                const b = worldBlocks[i].position;
+                if (Math.abs(b.x - targetPos.x) < 1.1 && Math.abs(b.z - targetPos.z) < 1.1 && Math.abs(b.y - (targetPos.y - 1.0)) < 1.5) {
+                    const boxMinX = b.x - 0.5, boxMaxX = b.x + 0.5;
+                    const boxMinZ = b.z - 0.5, boxMaxZ = b.z + 0.5;
+                    const boxMinY = b.y - 0.5, boxMaxY = b.y + 0.5;
+
+                    const closestX = Math.max(boxMinX, Math.min(targetPos.x, boxMaxX));
+                    const closestZ = Math.max(boxMinZ, Math.min(targetPos.z, boxMaxZ));
+
+                    const distX = targetPos.x - closestX;
+                    const distZ = targetPos.z - closestZ;
+                    
+                    // --- ОБНОВЛЕНО: Проверка по всей высоте персонажа (от targetPos.y - playerHeight до targetPos.y) ---
+                    const pMinY = targetPos.y - playerHeight;
+                    const pMaxY = targetPos.y;
+
+                    if ((distX * distX + distZ * distZ) < (playerRadius * playerRadius) && (pMinY < boxMaxY && pMaxY > boxMinY)) {
+                        return true; 
+                    }
+                }
+            }
+            return false;
+        }
+
+        // === РАБОТА С БЛОКАМИ ===
+        const raycaster = new THREE.Raycaster();
+        const center = new THREE.Vector2(0, 0);
+
+        document.getElementById('btn-break').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            raycaster.setFromCamera(center, camera);
+            const intersects = raycaster.intersectObjects(worldBlocks);
+            if (intersects.length > 0 && intersects[0].distance < 6) {
+                const b = intersects[0].object;
+                if(b.position.y === 0) return;
+                scene.remove(b);
+                worldBlocks.splice(worldBlocks.indexOf(b), 1);
+            }
+        });
+
+        document.getElementById('btn-build').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            raycaster.setFromCamera(center, camera);
+            const intersects = raycaster.intersectObjects(worldBlocks);
+            if (intersects.length > 0 && intersects[0].distance < 6) {
+                const intersect = intersects[0];
+                const spawnPos = new THREE.Vector3().copy(intersect.object.position).add(intersect.face.normal);
+                
+                // Проверка, чтобы не поставить блок внутрь себя
+                const distToPlayer = spawnPos.distanceTo(new THREE.Vector3(camera.position.x, spawnPos.y, camera.position.z));
+                // Обновлена проверка дистанции до нового роста
+                if (distToPlayer > 0.7 || Math.abs(camera.position.y - spawnPos.y) > playerHeight - 0.2) {
+                    createBlock(spawnPos.x, spawnPos.y, spawnPos.z, currentSelectedBlockType);
+                }
+            }
+        });
+
+        // === МЕНЕДЖЕР ЭКРАНОВ ===
+        function toggleUI(inGame) {
+            const state = inGame ? 'block' : 'none';
+            const menuState = inGame ? 'none' : 'flex';
+            document.getElementById('main-menu').style.display = menuState;
+            document.getElementById('game-canvas').style.display = state;
+            document.getElementById('crosshair').style.display = state;
+            document.getElementById('exit-btn').style.display = state;
+            document.getElementById('d-pad').style.display = inGame ? 'grid' : 'none';
+            document.getElementById('action-pad').style.display = inGame ? 'grid' : 'none';
+            document.getElementById('hotbar').style.display = inGame ? 'flex' : 'none';
+            if(inGame) window.dispatchEvent(new Event('resize'));
+        }
+
+        document.getElementById('play-btn').addEventListener('click', () => toggleUI(true));
+        document.getElementById('exit-btn').addEventListener('click', () => toggleUI(false));
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // === ИГРОВОЙ ЦИКЛ ===
+        const moveDir = new THREE.Vector3();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            playerVelocityY += gravity;
+            camera.position.y += playerVelocityY;
+
+            // --- ОБНОВЛЕНО: groundY теперь равен playerHeight (2.0) ---
+            let groundY = playerHeight; 
+            
+            for(let i=0; i<worldBlocks.length; i++) {
+                let b = worldBlocks[i].position;
+                if (Math.abs(b.x - camera.position.x) < 0.65 && Math.abs(b.z - camera.position.z) < 0.65) {
+                    // Проверка приземления на блок: ноги игрока находятся на block.y + 0.5, глаза на +2.0
+                    if (b.y + playerHeight > groundY && camera.position.y >= b.y + playerHeight - 0.2) {
+                        groundY = b.y + playerHeight;
+                    }
+                }
+            }
+
+            if (camera.position.y <= groundY) {
+                camera.position.y = groundY;
+                playerVelocityY = 0;
+                isGrounded = true;
+            }
+
+            moveDir.set(0, 0, 0);
+            if (moveState.forward) moveDir.z -= 1;
+            if (moveState.backward) moveDir.z += 1;
+            if (moveState.left) moveDir.x -= 1;
+            if (moveState.right) moveDir.x += 1;
+
+            if (moveDir.lengthSq() > 0) {
+                moveDir.normalize();
+                moveDir.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
+                
+                let testPosX = camera.position.clone().addScaledVector(new THREE.Vector3(moveDir.x, 0, 0), speed);
+                if (!checkCollisions(testPosX)) {
+                    camera.position.x = testPosX.x;
+                }
+                
+                let testPosZ = camera.position.clone().addScaledVector(new THREE.Vector3(0, 0, moveDir.z), speed);
+                if (!checkCollisions(testPosZ)) {
+                    camera.position.z = testPosZ.z;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
+
