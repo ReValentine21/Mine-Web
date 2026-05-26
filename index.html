@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <title>Minecraft Mobile 2 Blocks Edition</title>
+    <title>MINE-WEB Mobile</title>
     <style>
+        /* Базовые настройки */
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background-color: #222; font-family: 'Arial Black', sans-serif;
+            background-color: #111; 
+            /* Современный системный шрифт */
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             touch-action: none; user-select: none; -webkit-user-select: none;
         }
 
@@ -16,114 +19,131 @@
             z-index: 1; display: none;
         }
 
-        /* === ПРЕДУПРЕЖДЕНИЕ ОБ ОРИЕНТАЦИИ (ПОРТРЕТНЫЙ РЕЖИМ) === */
+        /* === ПРЕДУПРЕЖДЕНИЕ ОБ ОРИЕНТАЦИИ === */
         #orientation-warning {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
-            background-color: #333; color: #fff;
-            display: none; /* Скрыт по умолчанию, JS его покажет */
-            justify-content: center; align-items: center; text-align: center;
-            flex-direction: column; font-family: 'Arial Black', sans-serif;
+            background: linear-gradient(135deg, #1f1f1f, #000000); color: #fff;
+            display: none; justify-content: center; align-items: center; text-align: center;
+            flex-direction: column;
         }
         #orientation-warning.active { display: flex; }
         .warning-content { padding: 20px; }
-        #orientation-warning h1 { font-size: 36px; color: #f44336; margin-bottom: 15px; text-shadow: 2px 2px 0 #000; }
-        #orientation-warning p { font-size: 16px; line-height: 1.4; margin-bottom: 25px; }
-        .rotate-icon { font-size: 56px; animation: rotate 2.5s linear infinite; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #orientation-warning h1 { font-size: 28px; color: #ff4757; margin-bottom: 15px; font-weight: 800; }
+        #orientation-warning p { font-size: 16px; color: #ced6e0; margin-bottom: 25px; }
+        .rotate-icon { font-size: 48px; animation: rotate 2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* === ОФИЦИАЛЬНОЕ СТРОГОЕ ГЛАВНОЕ МЕНЮ === */
+        /* === СОВРЕМЕННОЕ ГЛАВНОЕ МЕНЮ === */
         #main-menu {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
-            background: #3a3a3a;
-            background-image: radial-gradient(rgba(0,0,0,0.3) 15%, transparent 16%),
-                              radial-gradient(rgba(0,0,0,0.3) 15%, transparent 16%);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
+            background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
         .menu-title {
-            font-size: 32px; color: #fff; text-shadow: 3px 3px 0px #111;
-            margin-bottom: 35px; letter-spacing: 2.5px; text-align: center;
+            font-size: 48px; font-weight: 900; color: #ffffff;
+            margin-bottom: 40px; letter-spacing: 2px; text-align: center;
+            text-shadow: 0 8px 20px rgba(0,0,0,0.6);
         }
-        .menu-title span { color: #55ff55; }
-
-        .menu-btn {
-            width: 260px; padding: 12px; background: #6c6c6c;
-            border: 3px solid #000; border-top-color: #b1b1b1; border-left-color: #b1b1b1;
-            color: #fff; font-size: 14px; text-shadow: 1px 1px 0px #000;
-            cursor: pointer; text-align: center; box-shadow: 0 4px 0px #222;
+        .menu-title span { 
+            display: block; font-size: 20px; color: #2ecc71; 
+            font-weight: 600; letter-spacing: 5px; margin-top: 5px; text-transform: uppercase;
         }
-        .menu-btn:active { background: #4e4e4e; transform: translateY(2px); box-shadow: 0 2px 0px #222; }
 
-        /* === ИГРОВОЙ HUD (ИНТЕРФЕЙС) === */
+        /* Красивая кнопка старта */
+        .start-btn {
+            padding: 16px 40px; border: none; border-radius: 30px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white; font-size: 18px; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .start-btn:active { 
+            transform: scale(0.95); 
+            box-shadow: 0 5px 10px rgba(46, 204, 113, 0.2); 
+        }
+
+        /* === ИГРОВОЙ HUD (СОВРЕМЕННЫЙ СТИЛЬ СТЕКЛА) === */
         #crosshair {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 16px; height: 16px; z-index: 10; pointer-events: none; display: none;
+            width: 12px; height: 12px; z-index: 10; pointer-events: none; display: none;
+            opacity: 0.8;
         }
-        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; }
-        #crosshair::before { top: 7px; left: 0; width: 16px; height: 2px; }
-        #crosshair::after { top: 0; left: 7px; width: 2px; height: 16px; }
+        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; border-radius: 2px;}
+        #crosshair::before { top: 5px; left: 0; width: 12px; height: 2px; }
+        #crosshair::after { top: 0; left: 5px; width: 2px; height: 12px; }
 
         #exit-btn {
-            position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-            z-index: 15; padding: 5px 14px; font-size: 11px; display: none; width: auto;
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 15; padding: 8px 20px; font-size: 12px; font-weight: bold;
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.2);
+            color: white; border-radius: 20px; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            display: none;
         }
 
+        /* Панели управления */
         #d-pad {
-            position: absolute; bottom: 15px; left: 15px; z-index: 10;
-            display: none; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px 50px; gap: 4px;
+            position: absolute; bottom: 20px; left: 20px; z-index: 10;
+            display: none; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px 55px; gap: 8px;
         }
-
         #action-pad {
-            position: absolute; bottom: 15px; right: 15px; z-index: 10;
-            display: none; grid-template-columns: 55px 55px; gap: 8px;
+            position: absolute; bottom: 20px; right: 20px; z-index: 10;
+            display: none; grid-template-columns: 60px 60px; gap: 12px;
         }
 
+        /* Стиль стеклянных кнопок */
         .btn {
-            background: rgba(50, 50, 50, 0.5); border: 2px solid #fff; border-radius: 6px;
-            color: #fff; display: flex; justify-content: center; align-items: center; font-size: 16px;
+            background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            border-radius: 14px;
+            color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .btn:active { background: rgba(255, 255, 255, 0.4); }
+        .btn:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.95); }
         
         #btn-w { grid-column: 2; grid-row: 1; }
         #btn-a { grid-column: 1; grid-row: 2; }
         #btn-s { grid-column: 2; grid-row: 3; }
         #btn-d { grid-column: 3; grid-row: 2; }
         
-        .action-btn { width: 50px; height: 50px; border-radius: 50%; font-size: 18px; }
-        #btn-jump { grid-column: 1 / span 2; height: 38px; font-size: 11px; border-radius: 4px; }
+        .action-btn { width: 60px; height: 60px; border-radius: 50%; font-size: 22px; }
+        #btn-jump { grid-column: 1 / span 2; height: 45px; font-size: 13px; font-weight: bold; border-radius: 12px; letter-spacing: 1px; }
 
+        /* Инвентарь */
         #hotbar {
-            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-            z-index: 10; display: none; background: rgba(0,0,0,0.6);
-            border: 3px solid #444; padding: 2px; gap: 4px; border-radius: 4px;
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 10; display: none; background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); padding: 5px; gap: 8px; border-radius: 16px;
         }
         .slot {
-            width: 36px; height: 36px; background: #8b8b8b; border: 2px solid #3a3a3a;
-            display: flex; justify-content: center; align-items: center; font-size: 18px;
-            cursor: pointer;
+            width: 42px; height: 42px; background: rgba(255,255,255,0.1); 
+            border: 2px solid transparent; border-radius: 10px;
+            display: flex; justify-content: center; align-items: center; font-size: 22px;
+            transition: all 0.2s ease;
         }
-        .slot.active { border-color: #fff; background: #b1b1b1; }
+        .slot.active { border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
     <div id="orientation-warning">
         <div class="warning-content">
-            <h1>УПС! ПОВЕРНИТЕ ЭКРАН</h1>
-            <p>Для игры требуется горизонтальный (ландшафтный) режим.<br>Пожалуйста, переверните ваше устройство.</p>
+            <h1>ПОВЕРНИТЕ УСТРОЙСТВО</h1>
+            <p>Для комфортной игры перейдите<br>в горизонтальный режим.</p>
             <div class="rotate-icon">🔄</div>
         </div>
     </div>
 
     <div id="main-menu">
-        <div class="menu-title">MINECRAFT PE<br><span>WEB 2 BLOCKS EDITION</span></div>
-        <div class="menu-btn" id="play-btn">НАЧАТЬ ИГРУ</div>
+        <div class="menu-title">MINE-WEB<br><span>Mobile Edition</span></div>
+        <button class="start-btn" id="play-btn">Начать игру</button>
     </div>
 
     <div id="crosshair"></div>
-    <div id="exit-btn" class="menu-btn">В МЕНЮ</div>
+    <div id="exit-btn">В МЕНЮ</div>
     
     <div id="game-canvas"></div>
 
@@ -149,60 +169,68 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // === ЛОГИКА ОБНАРУЖЕНИЯ ОРИЕНТАЦИИ (НОВИНКА) ===
+        // === ЛОГИКА ОРИЕНТАЦИИ ===
         const warningScreen = document.getElementById('orientation-warning');
-        
         function checkOrientation() {
-            // Проверяем: ширина больше высоты = ландшафт
             const isLandscape = window.innerWidth > window.innerHeight;
-            
             if (!isLandscape) {
-                // Если портретный режим (вертикально): показать предупреждение, скрыть игру
                 warningScreen.classList.add('active');
             } else {
-                // Если ландшафтный режим (горизонтально): скрыть предупреждение, разблокировать игру
                 warningScreen.classList.remove('active');
-                // Триггер изменения размеров для three.js
                 window.dispatchEvent(new Event('resize'));
             }
         }
-
-        // Следим за изменениями размера окна и загрузкой
         window.addEventListener('DOMContentLoaded', checkOrientation);
         window.addEventListener('resize', checkOrientation);
         window.addEventListener('orientationchange', checkOrientation);
 
+        // === ПОЛНОЭКРАННЫЙ РЕЖИМ (ФУЛСКРИН) ===
+        function requestFullScreen() {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) docElm.requestFullscreen();
+            else if (docElm.mozRequestFullScreen) docElm.mozRequestFullScreen();
+            else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen();
+            else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
+        }
+
+        function exitFullScreen() {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.msExitFullscreen) document.msExitFullscreen();
+        }
+
         // === НАСТРОЙКИ СЦЕНЫ И ОПТИМИЗАЦИИ ===
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x7ec0ee);
-        scene.fog = new THREE.FogExp2(0x7ec0ee, 0.04);
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.FogExp2(0x87CEEB, 0.04);
 
-        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.rotation.order = 'YXZ';
 
         const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Легкая оптимизация пикселей
         document.getElementById('game-canvas').appendChild(renderer.domElement);
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambientLight);
-        const sunLight = new THREE.DirectionalLight(0xffffff, 0.4); sunLight.position.set(20, 40, 10); scene.add(sunLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.5); sunLight.position.set(20, 50, 20); scene.add(sunLight);
 
         // === МАТЕРИАЛЫ И БЛОКИ ===
         const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
         const edgeGeo = new THREE.EdgesGeometry(blockGeometry);
-        const edgeMat = new THREE.LineBasicMaterial({ color: 0x111111 });
+        const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1, opacity: 0.5, transparent: true });
 
         const materialsMap = {
-            0: [new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x5b9c31}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043})], // Трава
-            1: Array(6).fill(new THREE.MeshLambertMaterial({color:0x866043})), // Земля
-            2: Array(6).fill(new THREE.MeshLambertMaterial({color:0x777777})), // Камень
-            3: Array(6).fill(new THREE.MeshLambertMaterial({color:0xb07f35}))  // Доски
+            0: [new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x5b9c31}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043}), new THREE.MeshLambertMaterial({color:0x866043})],
+            1: Array(6).fill(new THREE.MeshLambertMaterial({color:0x866043})),
+            2: Array(6).fill(new THREE.MeshLambertMaterial({color:0x7f8c8d})),
+            3: Array(6).fill(new THREE.MeshLambertMaterial({color:0xd35400}))
         };
 
         let currentSelectedBlockType = 0;
         const worldBlocks = [];
-        const mapSize = 10;
+        const mapSize = 12;
 
         for (let x = -mapSize; x <= mapSize; x++) {
             for (let z = -mapSize; z <= mapSize; z++) {
@@ -223,14 +251,14 @@
         const slots = document.querySelectorAll('.slot');
         slots.forEach(slot => {
             slot.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Защита от срабатывания нескольких касаний
+                e.preventDefault();
                 slots.forEach(s => s.classList.remove('active'));
                 slot.classList.add('active');
                 currentSelectedBlockType = parseInt(slot.getAttribute('data-block'));
             });
         });
 
-        // === ПЛАВНОЕ МОБИЛЬНОЕ ВРАЩЕНИЕ КАМЕРЫ ===
+        // === КАМЕРА ===
         let isDragging = false;
         let prevTouchX = 0, prevTouchY = 0;
         const canvasZone = document.getElementById('game-canvas');
@@ -243,34 +271,28 @@
 
         canvasZone.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
-            const touchX = e.touches[0].clientX;
-            const touchY = e.touches[0].clientY;
+            const deltaX = e.touches[0].clientX - prevTouchX;
+            const deltaY = e.touches[0].clientY - prevTouchY;
 
-            const deltaX = touchX - prevTouchX;
-            const deltaY = touchY - prevTouchY;
-
-            if (Math.abs(deltaX) < 80 && Math.abs(deltaY) < 80) {
+            if (Math.abs(deltaX) < 100 && Math.abs(deltaY) < 100) {
                 camera.rotation.y -= deltaX * 0.005;
                 camera.rotation.x -= deltaY * 0.005;
-                camera.rotation.x = Math.max(-Math.PI/2.3, Math.min(Math.PI/2.3, camera.rotation.x));
+                camera.rotation.x = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, camera.rotation.x));
             }
-            prevTouchX = touchX; prevTouchY = touchY;
+            prevTouchX = e.touches[0].clientX; prevTouchY = e.touches[0].clientY;
         });
         canvasZone.addEventListener('touchend', () => isDragging = false);
 
-        // === ДВИЖЕНИЕ И ФИЗИКА (УВЕЛИЧЕНА ВЫСОТА) ===
+        // === ФИЗИКА ===
         const moveState = { forward: false, backward: false, left: false, right: false };
         let playerVelocityY = 0;
         let isGrounded = true;
-        const gravity = -0.012;
-        const jumpForce = 0.22;
-        const speed = 0.07;
+        const gravity = -0.015;
+        const jumpForce = 0.25;
+        const speed = 0.09;
         
         const playerRadius = 0.35;
-        // --- ИЗМЕНЕНИЕ: РОСТ ТЕПЕРЬ 2 БЛОКА ---
-        const playerHeight = 2.0; // Высота до глаз. Был 1.8.
-
-        // --- ИЗМЕНЕНИЕ: ГЛАЗА СРАЗУ НА ВЫСОТЕ 2.0 ---
+        const playerHeight = 2.0; 
         camera.position.set(0, playerHeight, 0); 
 
         function bindControl(id, action) {
@@ -286,7 +308,6 @@
             if (isGrounded) { playerVelocityY = jumpForce; isGrounded = false; }
         });
 
-        // Функция проверки коллизий цилиндра игрока и боксов
         function checkCollisions(targetPos) {
             for (let i = 0; i < worldBlocks.length; i++) {
                 const b = worldBlocks[i].position;
@@ -301,7 +322,6 @@
                     const distX = targetPos.x - closestX;
                     const distZ = targetPos.z - closestZ;
                     
-                    // --- ОБНОВЛЕНО: Проверка по всей высоте персонажа (от targetPos.y - playerHeight до targetPos.y) ---
                     const pMinY = targetPos.y - playerHeight;
                     const pMaxY = targetPos.y;
 
@@ -313,7 +333,7 @@
             return false;
         }
 
-        // === РАБОТА С БЛОКАМИ ===
+        // === СТРОИТЕЛЬСТВО ===
         const raycaster = new THREE.Raycaster();
         const center = new THREE.Vector2(0, 0);
 
@@ -337,16 +357,14 @@
                 const intersect = intersects[0];
                 const spawnPos = new THREE.Vector3().copy(intersect.object.position).add(intersect.face.normal);
                 
-                // Проверка, чтобы не поставить блок внутрь себя
                 const distToPlayer = spawnPos.distanceTo(new THREE.Vector3(camera.position.x, spawnPos.y, camera.position.z));
-                // Обновлена проверка дистанции до нового роста
                 if (distToPlayer > 0.7 || Math.abs(camera.position.y - spawnPos.y) > playerHeight - 0.2) {
                     createBlock(spawnPos.x, spawnPos.y, spawnPos.z, currentSelectedBlockType);
                 }
             }
         });
 
-        // === МЕНЕДЖЕР ЭКРАНОВ ===
+        // === МЕНЕДЖЕР ЭКРАНОВ С ФУЛСКРИНОМ ===
         function toggleUI(inGame) {
             const state = inGame ? 'block' : 'none';
             const menuState = inGame ? 'none' : 'flex';
@@ -357,11 +375,21 @@
             document.getElementById('d-pad').style.display = inGame ? 'grid' : 'none';
             document.getElementById('action-pad').style.display = inGame ? 'grid' : 'none';
             document.getElementById('hotbar').style.display = inGame ? 'flex' : 'none';
-            if(inGame) window.dispatchEvent(new Event('resize'));
+            
+            if(inGame) {
+                setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+            }
         }
 
-        document.getElementById('play-btn').addEventListener('click', () => toggleUI(true));
-        document.getElementById('exit-btn').addEventListener('click', () => toggleUI(false));
+        document.getElementById('play-btn').addEventListener('click', () => {
+            requestFullScreen(); // Запрос полного экрана при старте
+            toggleUI(true);
+        });
+        
+        document.getElementById('exit-btn').addEventListener('click', () => {
+            exitFullScreen(); // Выход из полного экрана
+            toggleUI(false);
+        });
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -369,7 +397,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // === ИГРОВОЙ ЦИКЛ ===
+        // === ЦИКЛ ===
         const moveDir = new THREE.Vector3();
 
         function animate() {
@@ -378,13 +406,11 @@
             playerVelocityY += gravity;
             camera.position.y += playerVelocityY;
 
-            // --- ОБНОВЛЕНО: groundY теперь равен playerHeight (2.0) ---
             let groundY = playerHeight; 
             
             for(let i=0; i<worldBlocks.length; i++) {
                 let b = worldBlocks[i].position;
                 if (Math.abs(b.x - camera.position.x) < 0.65 && Math.abs(b.z - camera.position.z) < 0.65) {
-                    // Проверка приземления на блок: ноги игрока находятся на block.y + 0.5, глаза на +2.0
                     if (b.y + playerHeight > groundY && camera.position.y >= b.y + playerHeight - 0.2) {
                         groundY = b.y + playerHeight;
                     }
@@ -425,4 +451,3 @@
     </script>
 </body>
 </html>
-
