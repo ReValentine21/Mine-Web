@@ -5,151 +5,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
     <title>MINE-WEB Mobile</title>
     <style>
+        /* === ТЕМЫ ИНТЕРФЕЙСА === */
         :root {
             --ui-bg: rgba(0, 0, 0, 0.4);
             --ui-border: rgba(255, 255, 255, 0.1);
-            --ui-blur: 2px;
+            --ui-blur: 4px;
             --ui-color: #fff;
+            --menu-bg: #111;
         }
 
-        /* Светлая тема - Liquid Glass */
         body.theme-light {
-            --ui-bg: rgba(255, 255, 255, 0.2);
-            --ui-border: rgba(255, 255, 255, 0.4);
-            --ui-blur: 10px;
-            --ui-color: #f0f0f0;
+            --ui-bg: rgba(255, 255, 255, 0.3);
+            --ui-border: rgba(255, 255, 255, 0.6);
+            --ui-blur: 15px;
+            --ui-color: #111;
+            --menu-bg: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop') center/cover;
         }
 
-        /* Темная тема - Оптимизированная */
         body.theme-dark {
-            --ui-bg: rgba(15, 15, 15, 0.6);
-            --ui-border: rgba(50, 50, 50, 0.5);
-            --ui-blur: 0px;
-            --ui-color: #ddd;
+            --ui-bg: rgba(15, 15, 15, 0.65);
+            --ui-border: rgba(80, 80, 80, 0.5);
+            --ui-blur: 2px; /* Меньше размытия для ФПС */
+            --ui-color: #f0f0f0;
+            --menu-bg: url('https://images.unsplash.com/photo-1606037150583-fb80ac72b834?q=80&w=1000&auto=format&fit=crop') center/cover;
         }
 
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background-color: #111; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #87CEEB; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none; user-select: none; -webkit-user-select: none;
         }
 
+        /* Игровой холст (Теперь точно будет виден!) */
         #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: none; }
 
         /* Предупреждение об ориентации */
         #orientation-warning {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
-            background: #111; color: #fff; display: none; justify-content: center; align-items: center; text-align: center; flex-direction: column;
+            background: #111; color: #fff; display: none; justify-content: center; align-items: center; text-align: center;
         }
-        #orientation-warning.active { display: flex; }
+        @media (orientation: portrait) { #orientation-warning { display: flex !important; } }
 
-        /* Окна меню (Главное, Пауза, Настройки) */
+        /* === КРАСИВЫЕ МЕНЮ (Liquid Glass) === */
         .menu-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
-            background: url('https://images.unsplash.com/photo-1606037150583-fb80ac72b834?q=80&w=1000&auto=format&fit=crop') center/cover;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: var(--menu-bg);
+            display: none; justify-content: center; align-items: center;
         }
-        .menu-overlay::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: -1; }
         
-        #pause-menu, #settings-menu { background: rgba(0,0,0,0.8); display: none; }
+        .menu-card {
+            background: var(--ui-bg);
+            backdrop-filter: blur(var(--ui-blur));
+            -webkit-backdrop-filter: blur(var(--ui-blur));
+            border: 1px solid var(--ui-border);
+            padding: 30px 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 300px;
+        }
 
-        .menu-title { font-size: 40px; font-weight: bold; color: #fff; margin-bottom: 30px; text-shadow: 2px 2px 0 #000; text-align: center; }
+        .menu-title { font-size: 32px; font-weight: 800; color: var(--ui-color); margin-bottom: 20px; letter-spacing: 1px; }
+        .menu-title span { font-size: 14px; font-weight: normal; opacity: 0.7; display: block; margin-top: -5px; }
         
         .menu-btn {
-            width: 250px; padding: 12px; margin: 8px; border: 2px solid #555; background: rgba(50, 50, 50, 0.8);
-            color: white; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase;
+            width: 100%; padding: 14px; margin-top: 12px;
+            background: rgba(100, 100, 100, 0.2);
+            border: 1px solid var(--ui-border);
+            color: var(--ui-color); font-size: 16px; font-weight: bold;
+            border-radius: 12px; cursor: pointer; transition: 0.1s; text-transform: uppercase;
         }
-        .menu-btn:active { background: rgba(100, 100, 100, 0.8); }
-        .menu-btn.green { background: #2e7d32; border-color: #1b5e20; }
+        body.theme-light .menu-btn { background: rgba(255, 255, 255, 0.5); }
+        .menu-btn:active { transform: scale(0.96); }
+        
+        .menu-btn.green { background: #388E3C; color: white; border: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .menu-btn.green:active { background: #2E7D32; }
+        .menu-btn.red { background: #D32F2F; color: white; border: none; }
 
         /* Настройки */
-        .settings-block { margin-bottom: 20px; text-align: center; color: white; width: 250px; }
-        .settings-block label { display: block; margin-bottom: 5px; font-size: 14px; }
-        input[type=range] { width: 100%; }
+        .settings-block { margin-bottom: 20px; text-align: left; color: var(--ui-color); }
+        .settings-block label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: bold; }
+        input[type=range] { width: 100%; accent-color: #388E3C; }
 
-        /* Игровой HUD */
+        /* === ИГРОВОЙ ИНТЕРФЕЙС === */
         #crosshair {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 14px; height: 14px; z-index: 10; pointer-events: none; display: none; opacity: 0.7;
+            width: 16px; height: 16px; z-index: 10; pointer-events: none; display: none; opacity: 0.8;
         }
-        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; }
-        #crosshair::before { top: 6px; left: 0; width: 14px; height: 2px; }
-        #crosshair::after { top: 0; left: 6px; width: 2px; height: 14px; }
+        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: white; box-shadow: 0 0 2px black; }
+        #crosshair::before { top: 7px; left: 0; width: 16px; height: 2px; }
+        #crosshair::after { top: 0; left: 7px; width: 2px; height: 16px; }
 
         #pause-btn-hud {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 15; padding: 5px 15px; font-size: 12px; font-weight: bold;
-            background: var(--ui-bg); border: 1px solid var(--ui-border); color: white; border-radius: 8px;
+            z-index: 15; padding: 6px 20px; font-size: 12px; font-weight: bold; letter-spacing: 1px;
+            background: var(--ui-bg); border: 1px solid var(--ui-border); color: var(--ui-color); border-radius: 20px;
             display: none; backdrop-filter: blur(var(--ui-blur)); -webkit-backdrop-filter: blur(var(--ui-blur));
         }
 
-        /* Управление */
-        #d-pad { position: absolute; bottom: 20px; left: 20px; z-index: 10; display: none; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px 55px; gap: 5px; }
-        #action-pad { position: absolute; bottom: 20px; right: 20px; z-index: 10; display: none; grid-template-columns: 60px 60px; gap: 10px; }
+        #d-pad { position: absolute; bottom: 20px; left: 20px; z-index: 10; display: none; grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px 60px; gap: 6px; }
+        #action-pad { position: absolute; bottom: 20px; right: 20px; z-index: 10; display: none; grid-template-columns: 65px 65px; gap: 10px; }
 
         .btn {
-            background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 12px;
-            color: var(--ui-color); display: flex; justify-content: center; align-items: center; font-size: 20px;
+            background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 16px;
+            color: var(--ui-color); display: flex; justify-content: center; align-items: center; font-size: 24px;
             backdrop-filter: blur(var(--ui-blur)); -webkit-backdrop-filter: blur(var(--ui-blur));
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .btn:active { background: rgba(255, 255, 255, 0.4); }
+        .btn:active { background: rgba(150, 150, 150, 0.4); transform: scale(0.95); }
         
         #btn-w { grid-column: 2; grid-row: 1; }
         #btn-a { grid-column: 1; grid-row: 2; }
         #btn-s { grid-column: 2; grid-row: 3; }
         #btn-d { grid-column: 3; grid-row: 2; }
         
-        .action-btn { width: 60px; height: 60px; border-radius: 50%; font-size: 24px; }
-        #btn-jump { grid-column: 1 / span 2; height: 40px; font-size: 12px; font-weight: bold; }
+        .action-btn { width: 65px; height: 65px; border-radius: 50%; font-size: 28px; }
+        #btn-jump { grid-column: 1 / span 2; height: 45px; font-size: 14px; font-weight: bold; border-radius: 12px; }
 
         #hotbar {
             position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 10; display: none; background: var(--ui-bg); padding: 5px; gap: 5px; border-radius: 8px;
-            backdrop-filter: blur(var(--ui-blur)); border: 1px solid var(--ui-border);
+            z-index: 10; display: none; background: var(--ui-bg); padding: 6px; gap: 6px; border-radius: 12px;
+            backdrop-filter: blur(var(--ui-blur)); -webkit-backdrop-filter: blur(var(--ui-blur));
+            border: 1px solid var(--ui-border);
         }
         .slot {
-            width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid transparent; border-radius: 6px;
-            display: flex; justify-content: center; align-items: center; font-size: 20px;
+            width: 42px; height: 42px; background: rgba(0,0,0,0.2); border: 2px solid transparent; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center; font-size: 22px; transition: 0.1s;
         }
-        .slot.active { border-color: #fff; background: rgba(255, 255, 255, 0.3); }
+        body.theme-light .slot { background: rgba(255,255,255,0.3); }
+        .slot.active { border-color: #388E3C; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body class="theme-light"> <div id="orientation-warning"><h2>Поверните телефон горизонтально</h2></div>
 
-    <div id="main-menu" class="menu-overlay">
-        <div class="menu-title">MINE-WEB<br><span style="font-size: 16px; color: #aaa;">MOBILE EDITION</span></div>
-        <button class="menu-btn green" id="btn-start-game">Начать игру</button>
-        <button class="menu-btn" id="btn-main-settings">Настройки</button>
+    <div id="main-menu" class="menu-overlay" style="display: flex;">
+        <div class="menu-card">
+            <div class="menu-title">MINE-WEB<span>MOBILE EDITION</span></div>
+            <button class="menu-btn green" id="btn-start-game">Начать игру</button>
+            <button class="menu-btn" id="btn-main-settings">Настройки</button>
+        </div>
     </div>
 
     <div id="pause-menu" class="menu-overlay">
-        <div class="menu-title">ПАУЗА</div>
-        <button class="menu-btn green" id="btn-resume">Продолжить</button>
-        <button class="menu-btn" id="btn-pause-settings">Настройки</button>
-        <button class="menu-btn" id="btn-exit-main" style="background:#c62828;">В главное меню</button>
+        <div class="menu-card">
+            <div class="menu-title">ПАУЗА</div>
+            <button class="menu-btn green" id="btn-resume">Продолжить</button>
+            <button class="menu-btn" id="btn-pause-settings">Настройки</button>
+            <button class="menu-btn red" id="btn-exit-main">В главное меню</button>
+        </div>
     </div>
 
     <div id="settings-menu" class="menu-overlay">
-        <div class="menu-title">НАСТРОЙКИ</div>
-        
-        <div class="settings-block">
-            <label>Дальность прорисовки: <span id="render-dist-val">10</span></label>
-            <input type="range" id="render-dist-slider" min="6" max="16" value="10">
+        <div class="menu-card">
+            <div class="menu-title">НАСТРОЙКИ</div>
+            <div class="settings-block">
+                <label>Дальность прорисовки: <span id="render-dist-val">10</span></label>
+                <input type="range" id="render-dist-slider" min="6" max="16" value="10">
+            </div>
+            <div class="settings-block">
+                <label>Дизайн интерфейса</label>
+                <button class="menu-btn" id="btn-toggle-theme">СВЕТЛАЯ (Liquid Glass)</button>
+            </div>
+            <button class="menu-btn green" id="btn-close-settings" style="margin-top: 10px;">Готово</button>
         </div>
-
-        <div class="settings-block">
-            <label>Дизайн интерфейса</label>
-            <button class="menu-btn" id="btn-toggle-theme" style="width:100%; font-size:14px;">Тема: СВЕТЛАЯ (Стекло)</button>
-        </div>
-
-        <button class="menu-btn green" id="btn-close-settings" style="margin-top: 20px;">Готово</button>
     </div>
 
     <div id="crosshair"></div>
     <div id="pause-btn-hud">|| ПАУЗА</div>
-    <div id="game-canvas"></div>
-
-    <div id="d-pad">
+    <div id="game-canvas"></div> <div id="d-pad">
         <div id="btn-w" class="btn">▲</div>
         <div id="btn-a" class="btn">◀</div>
         <div id="btn-s" class="btn">▼</div>
@@ -163,11 +186,17 @@
     </div>
 
     <div id="hotbar">
-        <div class="slot active" data-block="0">🟩</div> <div class="slot" data-block="1">🟫</div> <div class="slot" data-block="2">⬜</div> <div class="slot" data-block="3">🪵</div> <div class="slot" data-block="4">🍃</div> <div class="slot" data-block="5">🧱</div> </div>
+        <div class="slot active" data-block="0">🟩</div>
+        <div class="slot" data-block="1">🟫</div>
+        <div class="slot" data-block="2">⬜</div>
+        <div class="slot" data-block="3">🪵</div>
+        <div class="slot" data-block="4">🍃</div>
+        <div class="slot" data-block="5">🧱</div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // === БАЗА ===
+        // === БАЗА И НАВИГАЦИЯ ===
         let renderDistance = 10;
         let isGameRunning = false;
         let currentTheme = 'light';
@@ -177,32 +206,38 @@
             else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
         }
 
-        // === ОРИЕНТАЦИЯ ===
-        function checkOrientation() {
-            if (window.innerWidth < window.innerHeight) {
-                document.getElementById('orientation-warning').classList.add('active');
-            } else {
-                document.getElementById('orientation-warning').classList.remove('active');
-            }
-        }
-        window.addEventListener('resize', checkOrientation); setInterval(checkOrientation, 1000); checkOrientation();
-
-        // === НАВИГАЦИЯ ПО МЕНЮ ===
         const ui = {
             main: document.getElementById('main-menu'),
             pause: document.getElementById('pause-menu'),
             settings: document.getElementById('settings-menu'),
-            hud: [document.getElementById('crosshair'), document.getElementById('pause-btn-hud'), document.getElementById('d-pad'), document.getElementById('action-pad'), document.getElementById('hotbar'), document.getElementById('game-canvas')]
+            hud: [
+                document.getElementById('crosshair'), 
+                document.getElementById('pause-btn-hud'), 
+                document.getElementById('d-pad'), 
+                document.getElementById('action-pad'), 
+                document.getElementById('hotbar'), 
+                document.getElementById('game-canvas') // Индекс 5!
+            ]
         };
 
         function showScreen(screenName) {
-            ui.main.style.display = 'none'; ui.pause.style.display = 'none'; ui.settings.style.display = 'none';
+            // Сначала жестко скрываем всё
+            ui.main.style.display = 'none';
+            ui.pause.style.display = 'none';
+            ui.settings.style.display = 'none';
             ui.hud.forEach(el => el.style.display = 'none');
             
             if(screenName === 'game') {
-                ui.hud.forEach(el => el.style.display = ''); 
-                ui.hud[2].style.display = 'grid'; ui.hud[3].style.display = 'grid'; ui.hud[4].style.display = 'flex';
-                isGameRunning = true; window.dispatchEvent(new Event('resize'));
+                // ВОТ ТУТ БЫЛА ОШИБКА. Теперь мы задаем конкретный display для каждого элемента.
+                ui.hud[0].style.display = 'block'; // прицел
+                ui.hud[1].style.display = 'block'; // кнопка паузы
+                ui.hud[2].style.display = 'grid';  // крестовина
+                ui.hud[3].style.display = 'grid';  // действия
+                ui.hud[4].style.display = 'flex';  // хотбар
+                ui.hud[5].style.display = 'block'; // ИГРОВОЙ ХОЛСТ (теперь он точно виден!)
+                
+                isGameRunning = true; 
+                window.dispatchEvent(new Event('resize')); // Фикс черного экрана при разворачивании
             } else {
                 isGameRunning = false;
                 if(screenName === 'main') ui.main.style.display = 'flex';
@@ -211,6 +246,7 @@
             }
         }
 
+        // Кнопки меню
         document.getElementById('btn-start-game').onclick = () => { goFullscreen(); showScreen('game'); };
         document.getElementById('pause-btn-hud').onclick = () => showScreen('pause');
         document.getElementById('btn-resume').onclick = () => { goFullscreen(); showScreen('game'); };
@@ -229,11 +265,18 @@
         };
 
         document.getElementById('btn-toggle-theme').onclick = (e) => {
-            if(currentTheme === 'light') { currentTheme = 'dark'; document.body.className = 'theme-dark'; e.target.innerText = 'Тема: ТЕМНАЯ (Оптим.)'; }
-            else { currentTheme = 'light'; document.body.className = 'theme-light'; e.target.innerText = 'Тема: СВЕТЛАЯ (Стекло)'; }
+            if(currentTheme === 'light') { 
+                currentTheme = 'dark'; 
+                document.body.className = 'theme-dark'; 
+                e.target.innerText = 'ТЁМНАЯ (Оптимизированная)'; 
+            } else { 
+                currentTheme = 'light'; 
+                document.body.className = 'theme-light'; 
+                e.target.innerText = 'СВЕТЛАЯ (Liquid Glass)'; 
+            }
         };
 
-        // === SCENE & THREE.JS ===
+        // === THREE.JS И СЦЕНА ===
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
         scene.fog = new THREE.Fog(0x87CEEB, renderDistance - 4, renderDistance + 2);
@@ -246,18 +289,18 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         document.getElementById('game-canvas').appendChild(renderer.domElement);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
-        const sunLight = new THREE.DirectionalLight(0xffffff, 0.4); sunLight.position.set(20, 50, 20); scene.add(sunLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85); scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.3); sunLight.position.set(20, 50, 20); scene.add(sunLight);
 
-        // === БЛОКИ ===
+        // === БЛОКИ И ИНВЕНТАРЬ ===
         const blockGeo = new THREE.BoxGeometry(1, 1, 1);
         const mats = {
-            0: [new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x4caf50}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b})], // Трава
-            1: Array(6).fill(new THREE.MeshLambertMaterial({color:0x8b5a2b})), // Земля
-            2: Array(6).fill(new THREE.MeshLambertMaterial({color:0x7f8c8d})), // Камень
-            3: [new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x5c4033})], // Дерево
-            4: Array(6).fill(new THREE.MeshLambertMaterial({color:0x2e7d32, transparent: true, opacity: 0.9})), // Листва
-            5: Array(6).fill(new THREE.MeshLambertMaterial({color:0xc0392b}))  // Кирпич
+            0: [new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x4caf50}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b})],
+            1: Array(6).fill(new THREE.MeshLambertMaterial({color:0x8b5a2b})),
+            2: Array(6).fill(new THREE.MeshLambertMaterial({color:0x7f8c8d})),
+            3: [new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x5c4033})],
+            4: Array(6).fill(new THREE.MeshLambertMaterial({color:0x2e7d32, transparent: true, opacity: 0.85})),
+            5: Array(6).fill(new THREE.MeshLambertMaterial({color:0xc0392b}))
         };
 
         const blockMap = new Map();
@@ -266,16 +309,12 @@
         function createBlock(x, y, z, type, isPlayerBuilt = false) {
             const key = `${x},${y},${z}`;
             if (blockMap.has(key)) return;
-
             const block = new THREE.Mesh(blockGeo, mats[type]);
             block.position.set(x, y, z);
-            block.isPlayerBuilt = isPlayerBuilt; // Чтобы не удалять постройки игрока
-            
-            scene.add(block);
-            blockMap.set(key, block);
+            block.isPlayerBuilt = isPlayerBuilt; 
+            scene.add(block); blockMap.set(key, block);
         }
 
-        // Хотбар
         const slots = document.querySelectorAll('.slot');
         slots.forEach(slot => {
             slot.addEventListener('touchstart', (e) => {
@@ -284,10 +323,9 @@
             });
         });
 
-        // === ГЕНЕРАЦИЯ И ОПТИМИЗАЦИЯ ЛАНДШАФТА ===
+        // === ГЕНЕРАЦИЯ И ОЧИСТКА ПАМЯТИ ===
         function getTerrainHeight(x, z) {
-            // Простая математическая генерация холмов (шум)
-            return Math.floor(Math.sin(x / 6) * 3 + Math.cos(z / 5) * 2);
+            return Math.floor(Math.sin(x / 8) * 2 + Math.cos(z / 6) * 2);
         }
 
         function generateAndUnloadChunks() {
@@ -295,7 +333,6 @@
             const pX = Math.round(camera.position.x);
             const pZ = Math.round(camera.position.z);
             
-            // 1. Генерация новых
             let added = 0;
             for(let x = pX - renderDistance; x <= pX + renderDistance; x++) {
                 for(let z = pZ - renderDistance; z <= pZ + renderDistance; z++) {
@@ -303,33 +340,29 @@
                         const h = getTerrainHeight(x, z);
                         const key = `${x},${h},${z}`;
                         if(!blockMap.has(key)) {
-                            createBlock(x, h, z, 0); // Трава
-                            createBlock(x, h-1, z, 1); // Земля
-                            createBlock(x, h-2, z, 2); // Камень
+                            createBlock(x, h, z, 0); 
+                            createBlock(x, h-1, z, 1);
                             added++;
-                            if(added > 10) return; // Чтобы не лагало
+                            if(added > 8) return; // Плавная генерация без фризов
                         }
                     }
                 }
             }
-
-            // 2. Удаление старых (ОПТИМИЗАЦИЯ ПАМЯТИ)
-            // Раз в секунду чистим карту
         }
+
         setInterval(() => {
             if(!isGameRunning) return;
             const pX = Math.round(camera.position.x);
             const pZ = Math.round(camera.position.z);
             for (let [key, block] of blockMap.entries()) {
-                if(block.isPlayerBuilt) continue; // Не удаляем то, что построил игрок
-                if (Math.hypot(block.position.x - pX, block.position.z - pZ) > renderDistance + 3) {
-                    scene.remove(block);
-                    blockMap.delete(key);
+                if(block.isPlayerBuilt) continue; 
+                if (Math.hypot(block.position.x - pX, block.position.z - pZ) > renderDistance + 4) {
+                    scene.remove(block); blockMap.delete(key);
                 }
             }
-        }, 1000);
+        }, 1500);
 
-        // === ИСПРАВЛЕННЫЙ МУЛЬТИТАЧ (ХОДЬБА + КАМЕРА) ===
+        // === МУЛЬТИТАЧ (Бег + Камера) ===
         let cameraTouchId = null;
         let prevX = 0, prevY = 0;
         const canvasZone = document.getElementById('game-canvas');
@@ -365,15 +398,14 @@
         });
         canvasZone.addEventListener('touchcancel', () => cameraTouchId = null);
 
-        // === ФИЗИКА И УПРАВЛЕНИЕ ===
+        // === УПРАВЛЕНИЕ И ФИЗИКА ==
         const moveState = { forward: false, backward: false, left: false, right: false };
-        let velY = 0; let isGrounded = true; const gravity = -0.015; const jumpForce = 0.22; const speed = 0.09;
+        let velY = 0; let isGrounded = true; const gravity = -0.015; const jumpForce = 0.22; const speed = 0.1;
         const playerRadius = 0.3; const playerHeight = 1.8;
-        camera.position.set(0, 10, 0); // Спавн повыше, чтобы упасть на ландшафт
+        camera.position.set(0, 15, 0); // Спавн в воздухе, плавно упадет на землю
 
         function bindBtn(id, act) {
             const el = document.getElementById(id);
-            // Важно! Останавливаем всплытие, чтобы не триггерило камеру
             el.addEventListener('touchstart', (e) => { e.stopPropagation(); moveState[act] = true; });
             el.addEventListener('touchend', (e) => { e.stopPropagation(); moveState[act] = false; });
             el.addEventListener('touchcancel', (e) => { e.stopPropagation(); moveState[act] = false; });
@@ -424,16 +456,18 @@
             if (intersects.length > 0 && intersects[0].distance < 6) {
                 const pos = new THREE.Vector3().copy(intersects[0].object.position).add(intersects[0].face.normal);
                 if(pos.distanceTo(camera.position) > 0.8 || pos.y < camera.position.y - playerHeight) {
-                    createBlock(pos.x, pos.y, pos.z, currentBlockType, true); // true = игрок построил
+                    createBlock(pos.x, pos.y, pos.z, currentBlockType, true);
                 }
             }
         });
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.updateProjectionMatrix(); 
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // === ЦИКЛ ===
+        // === ИГРОВОЙ ЦИКЛ ===
         const moveDir = new THREE.Vector3();
         function animate() {
             requestAnimationFrame(animate);
@@ -448,7 +482,7 @@
 
             for(let x = cMinX; x <= cMaxX; x++) {
                 for(let z = cMinZ; z <= cMaxZ; z++) {
-                    for(let y = Math.floor(camera.position.y); y >= -10; y--) {
+                    for(let y = Math.floor(camera.position.y); y >= -15; y--) {
                         if(blockMap.has(`${x},${y},${z}`)) {
                             if(y + 0.5 <= camera.position.y - playerHeight + 0.3) {
                                 if(y + 0.5 > highestY) highestY = y + 0.5;
@@ -458,8 +492,12 @@
                 }
             }
 
-            let ground = highestY !== -Infinity ? highestY : -10;
-            if (camera.position.y <= ground + playerHeight) { camera.position.y = ground + playerHeight; velY = 0; isGrounded = true; }
+            let ground = highestY !== -Infinity ? highestY : -15;
+            if (camera.position.y <= ground + playerHeight) { 
+                camera.position.y = ground + playerHeight; 
+                velY = 0; 
+                isGrounded = true; 
+            }
 
             moveDir.set(0, 0, 0);
             if (moveState.forward) moveDir.z -= 1; if (moveState.backward) moveDir.z += 1;
