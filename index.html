@@ -19,24 +19,25 @@
             --ui-border: rgba(255, 255, 255, 0.6);
             --ui-blur: 15px;
             --ui-color: #111;
-            --menu-bg: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop') center/cover;
+            /* Изменил фон меню на более спокойный градиент, ближе к теме неба */
+            --menu-bg: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
         }
 
         body.theme-dark {
             --ui-bg: rgba(15, 15, 15, 0.65);
             --ui-border: rgba(80, 80, 80, 0.5);
-            --ui-blur: 2px; /* Меньше размытия для ФПС */
+            --ui-blur: 2px;
             --ui-color: #f0f0f0;
-            --menu-bg: url('https://images.unsplash.com/photo-1606037150583-fb80ac72b834?q=80&w=1000&auto=format&fit=crop') center/cover;
+            --menu-bg: linear-gradient(135deg, #1d1d1d 0%, #0a0a0a 100%);
         }
 
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background-color: #87CEEB; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #a1c4fd; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none; user-select: none; -webkit-user-select: none;
         }
 
-        /* Игровой холст (Теперь точно будет виден!) */
+        /* Игровой холст */
         #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: none; }
 
         /* Предупреждение об ориентации */
@@ -136,7 +137,9 @@
         .slot.active { border-color: #388E3C; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
-<body class="theme-light"> <div id="orientation-warning"><h2>Поверните телефон горизонтально</h2></div>
+<body class="theme-light">
+
+    <div id="orientation-warning"><h2>Поверните телефон горизонтально</h2></div>
 
     <div id="main-menu" class="menu-overlay" style="display: flex;">
         <div class="menu-card">
@@ -159,8 +162,8 @@
         <div class="menu-card">
             <div class="menu-title">НАСТРОЙКИ</div>
             <div class="settings-block">
-                <label>Дальность прорисовки: <span id="render-dist-val">10</span></label>
-                <input type="range" id="render-dist-slider" min="6" max="16" value="10">
+                <label>Дальность прорисовки: <span id="render-dist-val">8</span></label>
+                <input type="range" id="render-dist-slider" min="4" max="12" value="8">
             </div>
             <div class="settings-block">
                 <label>Дизайн интерфейса</label>
@@ -172,7 +175,9 @@
 
     <div id="crosshair"></div>
     <div id="pause-btn-hud">|| ПАУЗА</div>
-    <div id="game-canvas"></div> <div id="d-pad">
+    <div id="game-canvas"></div>
+
+    <div id="d-pad">
         <div id="btn-w" class="btn">▲</div>
         <div id="btn-a" class="btn">◀</div>
         <div id="btn-s" class="btn">▼</div>
@@ -189,17 +194,16 @@
         <div class="slot active" data-block="0">🟩</div>
         <div class="slot" data-block="1">🟫</div>
         <div class="slot" data-block="2">⬜</div>
-        <div class="slot" data-block="3">🪵</div>
-        <div class="slot" data-block="4">🍃</div>
-        <div class="slot" data-block="5">🧱</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simplex-noise@2.4.0/simplex-noise.min.js"></script>
     <script>
         // === БАЗА И НАВИГАЦИЯ ===
-        let renderDistance = 10;
+        let renderDistance = 8;
         let isGameRunning = false;
         let currentTheme = 'light';
+        let simplex = new SimplexNoise(); // Создаем генератор шума
 
         function goFullscreen() {
             if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
@@ -216,28 +220,25 @@
                 document.getElementById('d-pad'), 
                 document.getElementById('action-pad'), 
                 document.getElementById('hotbar'), 
-                document.getElementById('game-canvas') // Индекс 5!
+                document.getElementById('game-canvas')
             ]
         };
 
         function showScreen(screenName) {
-            // Сначала жестко скрываем всё
             ui.main.style.display = 'none';
             ui.pause.style.display = 'none';
             ui.settings.style.display = 'none';
             ui.hud.forEach(el => el.style.display = 'none');
             
             if(screenName === 'game') {
-                // ВОТ ТУТ БЫЛА ОШИБКА. Теперь мы задаем конкретный display для каждого элемента.
-                ui.hud[0].style.display = 'block'; // прицел
-                ui.hud[1].style.display = 'block'; // кнопка паузы
-                ui.hud[2].style.display = 'grid';  // крестовина
-                ui.hud[3].style.display = 'grid';  // действия
-                ui.hud[4].style.display = 'flex';  // хотбар
-                ui.hud[5].style.display = 'block'; // ИГРОВОЙ ХОЛСТ (теперь он точно виден!)
-                
+                ui.hud[0].style.display = 'block';
+                ui.hud[1].style.display = 'block';
+                ui.hud[2].style.display = 'grid';
+                ui.hud[3].style.display = 'grid';
+                ui.hud[4].style.display = 'flex';
+                ui.hud[5].style.display = 'block';
                 isGameRunning = true; 
-                window.dispatchEvent(new Event('resize')); // Фикс черного экрана при разворачивании
+                window.dispatchEvent(new Event('resize'));
             } else {
                 isGameRunning = false;
                 if(screenName === 'main') ui.main.style.display = 'flex';
@@ -246,22 +247,21 @@
             }
         }
 
-        // Кнопки меню
-        document.getElementById('btn-start-game').onclick = () => { goFullscreen(); showScreen('game'); };
+        document.getElementById('btn-start-game').onclick = () => { goFullscreen(); showScreen('game'); startSpawnPhysics(); };
         document.getElementById('pause-btn-hud').onclick = () => showScreen('pause');
         document.getElementById('btn-resume').onclick = () => { goFullscreen(); showScreen('game'); };
-        document.getElementById('btn-exit-main').onclick = () => showScreen('main');
+        document.getElementById('btn-exitMain').onclick = () => showScreen('main');
         
         let previousMenu = 'main';
         document.getElementById('btn-main-settings').onclick = () => { previousMenu = 'main'; showScreen('settings'); };
         document.getElementById('btn-pause-settings').onclick = () => { previousMenu = 'pause'; showScreen('settings'); };
         document.getElementById('btn-close-settings').onclick = () => showScreen(previousMenu);
 
-        // Настройки логика
         document.getElementById('render-dist-slider').oninput = (e) => {
             renderDistance = parseInt(e.target.value);
             document.getElementById('render-dist-val').innerText = renderDistance;
-            scene.fog.near = renderDistance - 4; scene.fog.far = renderDistance + 2;
+            scene.fog.far = renderDistance + 2;
+            generateTerrain(true); // Перегенерировать ландшафт с новой дальностью
         };
 
         document.getElementById('btn-toggle-theme').onclick = (e) => {
@@ -278,10 +278,11 @@
 
         // === THREE.JS И СЦЕНА ===
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.Fog(0x87CEEB, renderDistance - 4, renderDistance + 2);
+        // Изменил фон сцены на спокойный голубой, характерный для Майнкрафта
+        scene.background = new THREE.Color(0xa1c4fd);
+        scene.fog = new THREE.Fog(0xa1c4fd, 1, renderDistance + 2);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.rotation.order = 'YXZ';
 
         const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
@@ -289,78 +290,72 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         document.getElementById('game-canvas').appendChild(renderer.domElement);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85); scene.add(ambientLight);
+        // Свет
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.9); scene.add(ambientLight);
         const sunLight = new THREE.DirectionalLight(0xffffff, 0.3); sunLight.position.set(20, 50, 20); scene.add(sunLight);
 
-        // === БЛОКИ И ИНВЕНТАРЬ ===
+        // === МАТЕРИАЛЫ БЛОКОВ ===
         const blockGeo = new THREE.BoxGeometry(1, 1, 1);
         const mats = {
             0: [new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x4caf50}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b})],
             1: Array(6).fill(new THREE.MeshLambertMaterial({color:0x8b5a2b})),
-            2: Array(6).fill(new THREE.MeshLambertMaterial({color:0x7f8c8d})),
-            3: [new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x8b5a2b}), new THREE.MeshLambertMaterial({color:0x5c4033}), new THREE.MeshLambertMaterial({color:0x5c4033})],
-            4: Array(6).fill(new THREE.MeshLambertMaterial({color:0x2e7d32, transparent: true, opacity: 0.85})),
-            5: Array(6).fill(new THREE.MeshLambertMaterial({color:0xc0392b}))
+            2: Array(6).fill(new THREE.MeshLambertMaterial({color:0x7f8c8d}))
         };
 
         const blockMap = new Map();
         let currentBlockType = 0;
+        let terrainMesh; // Для использования InstancedMesh
 
-        function createBlock(x, y, z, type, isPlayerBuilt = false) {
-            const key = `${x},${y},${z}`;
-            if (blockMap.has(key)) return;
-            const block = new THREE.Mesh(blockGeo, mats[type]);
-            block.position.set(x, y, z);
-            block.isPlayerBuilt = isPlayerBuilt; 
-            scene.add(block); blockMap.set(key, block);
-        }
+        // === ГЕНЕРАЦИЯ НЕБОЛЬШОГО ЛАНДШАФТА (Оптимизировано через InstancedMesh) ===
+        function generateTerrain(forceClear = false) {
+            if(forceClear || !terrainMesh) {
+                // Очистка старого ландшафта, если нужно
+                scene.children.filter(child => child.isInstancedMesh).forEach(child => scene.remove(child));
+                blockMap.clear();
 
-        const slots = document.querySelectorAll('.slot');
-        slots.forEach(slot => {
-            slot.addEventListener('touchstart', (e) => {
-                e.preventDefault(); slots.forEach(s => s.classList.remove('active'));
-                slot.classList.add('active'); currentBlockType = parseInt(slot.getAttribute('data-block'));
-            });
-        });
+                // Создаем InstancedMesh для оптимизации (используем только траву для простоты)
+                const totalBlocks = (renderDistance * 2 + 1) * (renderDistance * 2 + 1);
+                terrainMesh = new THREE.InstancedMesh(blockGeo, mats[0], totalBlocks);
+                scene.add(terrainMesh);
+            }
 
-        // === ГЕНЕРАЦИЯ И ОЧИСТКА ПАМЯТИ ===
-        function getTerrainHeight(x, z) {
-            return Math.floor(Math.sin(x / 8) * 2 + Math.cos(z / 6) * 2);
-        }
+            const matrix = new THREE.Matrix4();
+            let index = 0;
 
-        function generateAndUnloadChunks() {
-            if(!isGameRunning) return;
-            const pX = Math.round(camera.position.x);
-            const pZ = Math.round(camera.position.z);
-            
-            let added = 0;
-            for(let x = pX - renderDistance; x <= pX + renderDistance; x++) {
-                for(let z = pZ - renderDistance; z <= pZ + renderDistance; z++) {
-                    if (Math.hypot(x - pX, z - pZ) <= renderDistance) {
-                        const h = getTerrainHeight(x, z);
-                        const key = `${x},${h},${z}`;
-                        if(!blockMap.has(key)) {
-                            createBlock(x, h, z, 0); 
-                            createBlock(x, h-1, z, 1);
-                            added++;
-                            if(added > 8) return; // Плавная генерация без фризов
-                        }
-                    }
+            for(let x = -renderDistance; x <= renderDistance; x++) {
+                for(let z = -renderDistance; z <= renderDistance; z++) {
+                    // Генерируем высоту на основе шума для "небольшого" ландшафта
+                    // Шум в диапазоне [-1, 1], умножаем на амплитуду (2.5) для высоты холмов
+                    // Делим x и z на частоту (15) для плавности переходов
+                    const height = Math.round(simplex.noise2D(x / 15, z / 15) * 2.5);
+                    
+                    // Устанавливаем матрицу трансформации для экземпляра куба в InstancedMesh
+                    matrix.setPosition(x, height, z);
+                    terrainMesh.setMatrixAt(index, matrix);
+
+                    // Сохраняем в карту блоков для коллизий и строительства (только верхний слой)
+                    blockMap.set(`${x},${height},${z}`, mats[0]);
+                    
+                    // Закомментировал неоптимизированные блоки земли под травой, чтобы сохранить ФПС
+                    // createBlock(x, height - 1, z, 1);
+                    // createBlock(x, height - 2, z, 1);
+
+                    index++;
                 }
             }
+            terrainMesh.instanceMatrix.needsUpdate = true; // Уведомляем Three.js об изменениях в матрицах экземпляров
         }
 
-        setInterval(() => {
-            if(!isGameRunning) return;
-            const pX = Math.round(camera.position.x);
-            const pZ = Math.round(camera.position.z);
-            for (let [key, block] of blockMap.entries()) {
-                if(block.isPlayerBuilt) continue; 
-                if (Math.hypot(block.position.x - pX, block.position.z - pZ) > renderDistance + 4) {
-                    scene.remove(block); blockMap.delete(key);
-                }
-            }
-        }, 1500);
+        // Временная функция для создания неоптимизированных блоков земли под травой
+        // function createBlock(x, y, z, type) {
+        //     const key = `${x},${y},${z}`;
+        //     if (blockMap.has(key)) return;
+        //     const block = new THREE.Mesh(blockGeo, mats[type]);
+        //     block.position.set(x, y, z);
+        //     scene.add(block); blockMap.set(key, block);
+        // }
+
+        generateTerrain(); // Генерируем ландшафт при запуске
 
         // === МУЛЬТИТАЧ (Бег + Камера) ===
         let cameraTouchId = null;
@@ -398,11 +393,19 @@
         });
         canvasZone.addEventListener('touchcancel', () => cameraTouchId = null);
 
-        // === УПРАВЛЕНИЕ И ФИЗИКА ==
+        // === УПРАВЛЕНИЕ И ФИЗИКА ===
         const moveState = { forward: false, backward: false, left: false, right: false };
         let velY = 0; let isGrounded = true; const gravity = -0.015; const jumpForce = 0.22; const speed = 0.1;
         const playerRadius = 0.3; const playerHeight = 1.8;
-        camera.position.set(0, 15, 0); // Спавн в воздухе, плавно упадет на землю
+        
+        // Исправлено: Определяем высоту ландшафта в точке спавна и помещаем туда персонажа
+        const startHeight = Math.round(simplex.noise2D(0, 0) * 2.5);
+        camera.position.set(0, startHeight + playerHeight, 0); 
+        
+        // Физика для спавна, чтобы персонаж плавно опустился на землю
+        function startSpawnPhysics() {
+            velY = -0.05; // Небольшая начальная скорость вниз
+        }
 
         function bindBtn(id, act) {
             const el = document.getElementById(id);
@@ -444,6 +447,7 @@
             e.stopPropagation();
             raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
             const intersects = raycaster.intersectObjects(Array.from(blockMap.values()));
+            
             if (intersects.length > 0 && intersects[0].distance < 6) {
                 const b = intersects[0].object;
                 scene.remove(b); blockMap.delete(`${b.position.x},${b.position.y},${b.position.z}`);
@@ -453,13 +457,23 @@
             e.stopPropagation();
             raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
             const intersects = raycaster.intersectObjects(Array.from(blockMap.values()));
+            
             if (intersects.length > 0 && intersects[0].distance < 6) {
                 const pos = new THREE.Vector3().copy(intersects[0].object.position).add(intersects[0].face.normal);
                 if(pos.distanceTo(camera.position) > 0.8 || pos.y < camera.position.y - playerHeight) {
-                    createBlock(pos.x, pos.y, pos.z, currentBlockType, true);
+                    createBuiltBlock(pos.x, pos.y, pos.z, currentBlockType);
                 }
             }
         });
+
+        // Функция для создания неоптимизированных блоков, построенных игроком
+        function createBuiltBlock(x, y, z, type) {
+            const key = `${x},${y},${z}`;
+            if (blockMap.has(key)) return;
+            const block = new THREE.Mesh(blockGeo, mats[type]);
+            block.position.set(x, y, z);
+            scene.add(block); blockMap.set(key, block);
+        }
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight; 
@@ -472,8 +486,6 @@
         function animate() {
             requestAnimationFrame(animate);
             if(!isGameRunning) return;
-
-            generateAndUnloadChunks();
 
             velY += gravity; camera.position.y += velY;
             let highestY = -Infinity;
